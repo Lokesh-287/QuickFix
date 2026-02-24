@@ -1,0 +1,29 @@
+[
+ {
+  "average_repair_hours": 2,
+  "description": "Mobile handheld device used for communication and apps",
+  "device_type": "Smartphone",
+  "docstatus": 0,
+  "doctype": "Device Type",
+  "modified": "2026-02-24 13:45:15.941487",
+  "name": "Smartphone"
+ },
+ {
+  "average_repair_hours": 4,
+  "description": "Portable personal computer used for work and development",
+  "device_type": "Laptop",
+  "docstatus": 0,
+  "doctype": "Device Type",
+  "modified": "2026-02-24 13:45:47.934552",
+  "name": "Laptop"
+ },
+ {
+  "average_repair_hours": 3,
+  "description": "Touchscreen portable device larger than smartphone",
+  "device_type": "Tablet",
+  "docstatus": 0,
+  "doctype": "Device Type",
+  "modified": "2026-02-24 13:46:05.497209",
+  "name": "Tablet"
+ }
+]

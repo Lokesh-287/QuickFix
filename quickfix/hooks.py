@@ -247,3 +247,13 @@ app_license = "mit"
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
 
+fixtures = [
+    {
+        "doctype": "Device Type",
+        "filters": [
+            ["name", "in", ["Smartphone", "Laptop", "Tablet"]]
+        ]
+    }
+]
+# bench --site your-site export-fixtures 
+# need to run after adding a fixtures to add fixtures to app 
