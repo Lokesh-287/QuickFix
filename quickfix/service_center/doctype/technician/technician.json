@@ -82,9 +82,10 @@
   }
  ],
  "grid_page_length": 50,
+ "image_field": "photo",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-24 14:06:20.759027",
+ "modified": "2026-02-25 17:17:57.561411",
  "modified_by": "Administrator",
  "module": "Service Center",
  "name": "Technician",

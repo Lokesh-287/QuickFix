@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "JC-.YYYY.-#####",
+ "autoname": "JC-.YYYY.-.#####",
  "creation": "2026-02-24 22:36:43.837122",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -203,7 +203,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-02-24 23:13:17.349055",
+ "modified": "2026-02-25 18:39:43.633457",
  "modified_by": "Administrator",
  "module": "Service Center",
  "name": "Job Card",
