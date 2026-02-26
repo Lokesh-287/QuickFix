@@ -120,10 +120,10 @@ app_license = "mit"
 permission_query_conditions = {
     "Job Card":"quickfix.permissions.job_card_query"
  }
-#
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+
+has_permission = {
+	"Service Invoice": "quickfix.permissions.service_invoice_has_permission"
+}
 
 # DocType Class
 # ---------------
@@ -267,3 +267,4 @@ fixtures = [
 ]
 # bench --site your-site export-fixtures 
 # need to run after adding a fixtures to add fixtures to app 
+
