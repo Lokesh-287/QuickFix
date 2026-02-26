@@ -36,3 +36,41 @@ def manager_only_action():
         "value":"Manager operation executed"
     }
 
+#This is unsafe so i commented this function :(
+# @frappe.whitelist(allow_guest=True)
+# def get_job_cards_unsafe():
+
+#     # Ignores permissions
+#     # Returns ALL fields
+#     # Exposes sensitive data
+
+#     return frappe.get_all(
+#         "Job Card",
+#         fields="*"
+#     )
+
+@frappe.whitelist()
+def get_job_cards_safe():
+
+    user = frappe.session.user
+    roles = frappe.get_roles(user)
+
+    job_cards = frappe.get_list(
+        "Job Card",
+        fields=[
+            "name",
+            "customer_name",
+            "assigned_technician",
+            "status",
+            "payment_status"
+        ]
+    )
+
+    # Remove sensitive data for non-managers
+    if not {"Administrator", "System Manager", "QF Manager"} & set(roles):
+
+        for jc in job_cards:
+            jc.pop("customer_phone", None)
+            jc.pop("customer_email", None)
+
+    return job_cards
