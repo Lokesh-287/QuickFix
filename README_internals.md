@@ -92,3 +92,12 @@ Unique field = database enforced uniqueness
 
 ### D2 - Permission Query & has_permissioncd a
 Using frappe.get_all() in an whitelist method wont check the frappe's permission system, including permission_query_conditions. This means low-privilege users or guests can access records they are not supposed to see. It can cause serious data leakage.
+
+
+### E1 on_update() - demonstrate the recursion pitfall:
+
+`on_update()` runs after every save. Calling `save()` again triggers `on_update() `repeatedly:
+
+save → on_update → save → on_update → ...
+
+This leads to server freeze or RecursionError.
