@@ -75,14 +75,4 @@ Choose override_doctype_class when:
   overridden
 - inheritance and Method Resolution Order (MRO) behavior must be managed
 - customization cannot be achieved using simple event hooks
-
------------------------------------------------------------------
-## Why doc_events Is Safer Than override_doctype_class
------------------------------------------------------------------
-
-
-`doc_events` is safer for most use cases because it extends behavior
-instead of replacing it, preserving compatibility with future Frappe
-updates. `override_doctype_class` should be reserved only for deep
-customization where hooks are insufficient.
     """
