@@ -101,3 +101,10 @@ Using frappe.get_all() in an whitelist method wont check the frappe's permission
 save → on_update → save → on_update → ...
 
 This leads to server freeze or RecursionError.
+
+### E3 Why doc_events Is Safer Than override_doctype_class
+
+`doc_events` is safer for most use cases because it extends behavior
+instead of replacing it, preserving compatibility with future Frappe
+updates. `override_doctype_class` should be reserved only for deep
+customization where hooks are insufficient.
