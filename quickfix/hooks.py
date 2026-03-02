@@ -83,12 +83,12 @@ app_license = "mit"
 # ------------
 
 # before_install = "quickfix.install.before_install"
-# after_install = "quickfix.install.after_install"
+after_install = "quickfix.install.after_install"
 
 # Uninstallation
 # ------------
 
-# before_uninstall = "quickfix.uninstall.before_uninstall"
+before_uninstall = "quickfix.uninstall.before_uninstall"
 # after_uninstall = "quickfix.uninstall.after_uninstall"
 
 # Integration Setup
@@ -124,6 +124,13 @@ permission_query_conditions = {
 has_permission = {
 	"Service Invoice": "quickfix.permissions.service_invoice_has_permission"
 }
+# doc_events={
+#     "*":{
+#         "on_update":"quickfix.audit.log_change",
+#         "on_submit":"quickfix.audit.log_change",
+#         "on_cancel":"quickfix.audit.log_change"
+#     }
+# }
 override_doctype_class={"Job Card":"quickfix.overrides.custom_job_card.CustomeJobCard"}
 # DocType Class
 # ---------------
@@ -268,3 +275,8 @@ fixtures = [
 # bench --site your-site export-fixtures 
 # need to run after adding a fixtures to add fixtures to app 
 
+extend_bootinfo = "quickfix.boot.extend_bootinfo"
+app_include_js = "quickfix.bundle.js"
+
+on_session_creation="quickfix.sessions.on_session_creation"
+on_logout="quickfix.sessions.on_logout"
