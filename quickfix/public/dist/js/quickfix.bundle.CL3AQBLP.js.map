@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../apps/quickfix/quickfix/public/js/quickfix.bundle.js"],
+  "sourcesContent": ["// frappe.provide(\"frappe.views\");\n///home/lokesh2/frappe-bench/apps/quickfix/quickfix/public/js/quickfix.bundle.js\nconsole.log(\"23456789999999 test \")\n\nsetTimeout(() => {\n//    frappe.after_ajax(() => {\n\n    if (frappe.boot.quickfix_shop_name) {\n        console.log(frappe.boot.quickfix_shop_name)\n        $(\".navbar-home\").append(`\n            <span style=\"margin-left:15px;font-weight:bold;\">\n                 ${frappe.boot.quickfix_shop_name}\n            </span>\n        `);\n\n    }\n\n// });\n}, 100);"],
+  "mappings": ";;AAEA,UAAQ,IAAI,sBAAsB;AAElC,aAAW,MAAM;AAGb,QAAI,OAAO,KAAK,oBAAoB;AAChC,cAAQ,IAAI,OAAO,KAAK,kBAAkB;AAC1C,QAAE,cAAc,EAAE,OAAO;AAAA;AAAA,mBAEd,OAAO,KAAK;AAAA;AAAA,SAEtB;AAAA,IAEL;AAAA,EAGJ,GAAG,GAAG;",
+  "names": []
+}

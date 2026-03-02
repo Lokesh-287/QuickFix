@@ -98,7 +98,7 @@ Using frappe.get_all() in an whitelist method wont check the frappe's permission
 
 `on_update()` runs after every save. Calling `save()` again triggers `on_update() `repeatedly:
 
-save → on_update → save → on_update → ...
+save -> on_update -> save -> on_update → ...
 
 This leads to server freeze or RecursionError.
 
@@ -108,3 +108,25 @@ This leads to server freeze or RecursionError.
 instead of replacing it, preserving compatibility with future Frappe
 updates. `override_doctype_class` should be reserved only for deep
 customization where hooks are insufficient.
+
+### Multiple Validate Handlers Order
+
+When both controller and doc_events handlers exist:
+
+Execution order:
+
+* Controller validate() method
+
+* Specific DocType doc_events handler
+
+* Wildcard "*" handler
+
+If both handlers raise frappe.ValidationError, execution stops at the first
+exception and remaining handlers do not execute.
+
+### Wildcard + Specific DocType Conflict
+
+If both "*" and a specific DocType handler are registered for the same event,
+both handlers run.
+
+Specific handler runs before wildcard handler.
