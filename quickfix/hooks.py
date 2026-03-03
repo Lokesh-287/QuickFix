@@ -124,6 +124,27 @@ permission_query_conditions = {
 has_permission = {
 	"Service Invoice": "quickfix.permissions.service_invoice_has_permission"
 }
+
+jinja = {
+    "methods": [
+        "quickfix.utils.jinja_methods.get_shop_name"
+    ],
+    "filters": [
+        "quickfix.utils.jinja_methods.format_job_id"
+    ]
+}
+
+website_route_rules = [
+    {"from_route": "/check-status", "to_route": "my_jobs"}
+]
+
+portal_menu_items = [
+    {
+        "title": "Track My Job",
+        "route": "/check-status",
+        "role": "Guest"
+    }
+]
 # doc_events={
 #     "*":{
 #         "on_update":"quickfix.audit.log_change",

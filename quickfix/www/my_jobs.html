@@ -1,0 +1,22 @@
+<h2>My Job Cards</h2>
+<h3>{{ get_shop_name() }}</h3>
+<p>{{ "JC-0001" | format_job_id }}</p>
+{% if jobs %}
+    <table border="1" cellpadding="10">
+        <tr>
+            <th>Job ID</th>
+            <th>Status</th>
+            <th>Created On</th>
+        </tr>
+
+        {% for job in jobs %}
+        <tr>
+            <td>{{ job.name }}</td>
+            <td>{{ job.status }}</td>
+            <td>{{ job.creation }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    <p>No Job Cards Found</p>
+{% endif %}

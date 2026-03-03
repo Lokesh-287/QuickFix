@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_guest_to_view": 1,
  "allow_rename": 1,
  "autoname": "TECH-.####",
  "creation": "2026-02-24 14:00:19.237640",
@@ -15,7 +16,8 @@
   "photo",
   "joining_date",
   "user",
-  "notes"
+  "notes",
+  "route"
  ],
  "fields": [
   {
@@ -79,13 +81,21 @@
    "fieldname": "notes",
    "fieldtype": "Text",
    "label": "Notes"
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Route",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
+ "has_web_view": 1,
  "image_field": "photo",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-25 17:17:57.561411",
+ "modified": "2026-03-03 11:46:11.755072",
  "modified_by": "Administrator",
  "module": "Service Center",
  "name": "Technician",
@@ -105,6 +115,7 @@
    "write": 1
   }
  ],
+ "route": "tech",
  "row_format": "Dynamic",
  "rows_threshold_for_grid_search": 20,
  "sort_field": "modified",

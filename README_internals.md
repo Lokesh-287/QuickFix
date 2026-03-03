@@ -130,3 +130,97 @@ If both "*" and a specific DocType handler are registered for the same event,
 both handlers run.
 
 Specific handler runs before wildcard handler.
+
+#### F3 - Asset, Jinja & Website Hooks (5 pts)
+
+### app_include_js vs web_include_js
+## app_include_js
+
+Loads JavaScript only inside the Desk (/app).
+
+Used for internal logged-in users (Admin, Employee, Manager).
+
+Affects forms, list views, reports, navbar, etc. inside Desk UI.
+
+Not loaded on website or portal pages.
+
+## When to use:
+
+Customizing DocType behavior globally
+
+Modifying Desk navbar/sidebar
+
+Adding client scripts that should work across the Desk
+
+## web_include_js
+
+Loads JavaScript only on Website & Portal pages.
+
+Used for public users or external logged-in users (Customer, Supplier).
+
+Works on pages under /www or portal routes.
+
+Not loaded inside Desk.
+
+## When to use:
+
+Custom website UI interactions
+
+Portal page logic (e.g., customer dashboard)
+
+Public page animations or validations
+
+### doctype_js (Job Card)
+
+doctype_js loads JavaScript only in the Form view of the Job Card DocType.
+It is used to control client-side behavior such as field logic, validations, custom buttons, and event handling.
+It affects only that specific DocType form inside Desk.
+
+### doctype_list_js (Job Card)
+
+doctype_list_js loads JavaScript only in the List view of the Job Card DocType.
+It is used to customize how records appear and behave in the list page, such as indicators, filters, and list-level actions.
+
+### doctype_tree_js
+
+doctype_tree_js is used for DocTypes that represent hierarchical (parent-child) data.
+It applies to DocTypes like Account, Item Group, Territory, or Department, where records are arranged in a tree structure.
+
+Job Card is a transactional DocType without hierarchy, so tree view is not applicable.
+
+### Build Cache-Busting
+
+The command:
+
+`bench build --app quickfix`
+
+rebuilds the app’s frontend assets (JS and CSS) and generates updated bundled files.
+
+Browsers cache static assets for performance. After modifying JavaScript files, the browser may still load the old cached version. Rebuilding creates new asset versions, ensuring the browser loads the updated files.
+
+This process is called cache-busting and ensures recent JS changes are reflected properly.
+
+### Difference Between Jinja Context
+### Print Format Context
+
+## In Print Formats:
+
+The variable doc is automatically available.
+
+It represents the current document being printed.
+
+No need to manually define context.
+
+Used for generating PDFs or printed documents.
+
+Web Page Context
+
+## In Web Pages:
+
+No variables are automatically available.
+
+Data must be manually passed using get_context(context) in Python.
+
+Used for website or portal pages.
+
+Fully controlled by the developer.
