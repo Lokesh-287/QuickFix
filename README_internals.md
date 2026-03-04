@@ -224,3 +224,60 @@ Data must be manually passed using get_context(context) in Python.
 Used for website or portal pages.
 
 Fully controlled by the developer.
+
+## override_whitelisted_methods vs Monkey Patching
+
+### override_whitelisted_methods
+
+`override_whitelisted_methods` is a Frappe hook used to replace a whitelisted method from another app without modifying the original source code. The override is declared in `hooks.py`, making the behavior explicit and easy to track. Because it is managed by the Frappe framework, it is upgrade-safe and reversible by simply removing the hook.
+
+
+### Monkey Patching
+
+Monkey patching means replacing a function dynamically at runtime by reassigning it in code.
+
+## What Happens if Two Apps Override the Same Method?
+
+If two apps register an override for the same whitelisted method using `override_whitelisted_methods`, Frappe loads them based on the order defined in `sites/apps.txt`. The override from the **last loaded app takes precedence** and becomes the active implementation.
+
+The earlier override is silently replaced. This means only one override can be active at a time, which may create conflicts in multi-app environments.
+
+---
+
+## Signature Mismatch and TypeError
+
+When overriding a method, the override function must have the **same function signature** as the original method. If the parameters do not match, the framework may pass arguments that the function cannot accept.
+
+Original method example:
+
+```python
+def get_count(doctype, filters=None, debug=False, cache=False):
+```
+
+Correct override:
+
+```python
+def custom_get_count(doctype, filters=None, debug=False, cache=False):
+```
+
+If the override does not accept the same arguments, Python raises a `TypeError`.
+
+Example incorrect override:
+
+```python
+def custom_get_count(doctype):
+```
+
+When Frappe calls the function with additional parameters, the following error occurs:
+
+```
+TypeError: custom_get_count() takes 1 positional argument but 4 were given
+```
+
+This happens when:
+
+* Required parameters are missing
+* Argument order is incorrect
+* The function cannot accept additional parameters passed by the framework
+
+To avoid future compatibility issues, it is sometimes recommended to include `**kwargs` in the override function so that extra parameters can be handled safely.

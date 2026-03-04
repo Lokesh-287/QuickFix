@@ -202,9 +202,9 @@ override_doctype_class={"Job Card":"quickfix.overrides.custom_job_card.CustomeJo
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "quickfix.event.get_events"
-# }
+override_whitelisted_methods = {
+    "frappe.client.get_count":"quickfix.api.custom_get_count"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
