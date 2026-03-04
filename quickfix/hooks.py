@@ -276,6 +276,9 @@ override_whitelisted_methods = {
 # ignore_translatable_strings_from = []
 
 fixtures = [
+    "Custom Field",
+    "Property Setter",
+    "Workspace",
     {
         "doctype": "Device Type",
         "filters": [
@@ -291,6 +294,8 @@ fixtures = [
         "filters":[
             ["parent","in",["Device Type","Technician","Spare Part","Job Card","Service Invoice"]]
         ]
+    },{
+        "doctype": "QuickFix Settings"
     }
 ]
 # bench --site your-site export-fixtures 
