@@ -3,8 +3,17 @@ import frappe
 def after_install():
     create_default_device_types()
     create_quickfix_settings()
+    make_property_setter()
     frappe.msgprint("QuickFix installed successfully By Lokiiiiiiiiiiiiiiiii")
 
+def make_property_setter():
+    frappe.make_property_setter(
+        doctype="Job Card",
+        fieldname="remarks",
+        property="bold",
+        value="1",
+        property_type="Check"
+    )
 
 def create_default_device_types():
     default_devices=[
