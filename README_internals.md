@@ -299,3 +299,50 @@ Frappe executes patches listed in `patches.txt` sequentially in the order they a
 * Server-dependent validations should be implemented in backend Python methods.
 
 * Asynchronous operations such as frappe.call are better suited for onload or refresh
+
+
+## H3 Tree DocType
+
+A **Tree DocType** in Frappe represents hierarchical data where records are organized in a parent–child structure instead of a flat list. It allows users to visualize and manage relationships between records in a tree format. Common examples include **Account (Chart of Accounts)** and **Employee hierarchy**, where nodes can have multiple child records.
+
+## doctype_tree_js
+
+`doctype_tree_js` is used to customize the behavior of a Tree DocType in the UI. It allows developers to add custom logic such as actions, filters, or UI behavior specific to the tree view.
+
+## Required Fields for Tree DocType
+
+A Tree DocType requires additional fields to maintain hierarchy:
+
+* **parent_field** – stores the reference to the parent node in the hierarchy.
+* **is_group** – indicates whether the node can contain children (`1` for group nodes, `0` for leaf nodes).
+
+## H4 Client Script DocType vs Shipped JS
+
+Frappe allows client-side customization either through the **Client Script DocType** or through **JavaScript files shipped inside an app**.
+
+**Client Script DocType** stores JavaScript code in the database and applies it immediately without requiring deployment. This is useful for consultants or administrators who need to make quick UI changes directly from the Desk.
+
+**Shipped JS files** are part of the application codebase (for example `job_card.js`). They are version-controlled and deployed with the app, making them more suitable for structured development and long-term maintenance.
+
+### Tradeoffs
+
+Client Scripts are convenient for quick changes but are harder to track and manage because they are stored in the database and not version controlled. Shipped JS files are better for production systems since they are properly version controlled and reviewed as part of the application code.
+
+### Security Pitfall: Hiding Fields in JavaScript
+
+In this customization, the field `customer_phone` is hidden for non-managers using JavaScript:
+
+```javascript
+frm.set_df_property("customer_phone", "hidden", 1);
+```
+
+However, this only hides the field in the **user interface** and does not prevent access to the data. The field can still be retrieved through an API request or server-side code.
+
+For example:
+
+```python
+frappe.get_doc("Job Card", "JC-00001").customer_phone
+```
+
+This demonstrates that hiding fields in client-side JavaScript is **not a security mechanism**. Proper security must be enforced using role permissions or server-side validation.
+

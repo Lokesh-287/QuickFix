@@ -101,3 +101,6 @@ def custom_get_count(doctype,filters=None,debug=False,cache=False):
 def mark_as_delivered(job_card):
     frappe.db.set_value("Job Card",job_card,"status","Delivered")
     
+@frappe.whitelist()
+def mark_ready(job_card):
+    frappe.db.set_value("Job Card",job_card,"status","Ready for Delivery")
