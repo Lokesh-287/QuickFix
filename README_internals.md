@@ -280,5 +280,22 @@ This happens when:
 * Argument order is incorrect
 * The function cannot accept additional parameters passed by the framework
 
-To avoid future compatibility issues, it is sometimes recommended to include `**kwargs` in the override function so that extra parameters can be handled safely.
 
+
+
+### Fieldname Collision Risk
+
+A fieldname collision occurs when a custom field created in an app has the same **fieldname** as a field that may be added later by a future Frappe or ERPNext update. Since fieldnames must be unique within a DocType, this can lead to migration conflicts, duplicate field errors, or unexpected behavior during upgrades.
+---
+
+### Patching Order and Migration Stability
+
+Frappe executes patches listed in `patches.txt` sequentially in the order they appear. If **Patch 1 creates a Custom Field** and **Patch 2 reads or modifies that field**, they must be separate entries so that Patch 1 runs first and ensures the field exists before Patch 2 uses it. If both operations are merged into a single patch or executed out of order, the system may fail because Patch 2 might try to access a field that has not yet been created, causing migration errors.
+
+### H1 - Job Card Form Script (8 pts)
+
+* The validate event should not rely on asynchronous server calls because the save process does not wait for them.
+
+* Server-dependent validations should be implemented in backend Python methods.
+
+* Asynchronous operations such as frappe.call are better suited for onload or refresh

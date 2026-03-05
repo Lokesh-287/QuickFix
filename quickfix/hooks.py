@@ -152,7 +152,7 @@ portal_menu_items = [
 #         "on_cancel":"quickfix.audit.log_change"
 #     }
 # }
-override_doctype_class={"Job Card":"quickfix.overrides.custom_job_card.CustomeJobCard"}
+override_doctype_class={"Job Card":"quickfix.overrides.custom_job_card.CustomJobCard"}
 # DocType Class
 # ---------------
 # Override standard doctype classes

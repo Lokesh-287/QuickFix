@@ -87,7 +87,7 @@ def send_job_ready_email(job_name):
 
 @frappe.whitelist()
 def custom_get_count(doctype,filters=None,debug=False,cache=False):
-    print("!!!!!!!!!!!!!!!!!!!!!!!11")
+    # print("!!!!!!!!!!!!!!!!!!!!!!!11")
     frappe.get_doc({
         "doctype": "Audit Log",
         "doctype_name": doctype,
@@ -96,3 +96,8 @@ def custom_get_count(doctype,filters=None,debug=False,cache=False):
     }).insert(ignore_permissions=True)
     from frappe.client import get_count
     return get_count(doctype,filters,debug,cache)
+
+@frappe.whitelist()
+def mark_as_delivered(job_card):
+    frappe.db.set_value("Job Card",job_card,"status","Delivered")
+    
