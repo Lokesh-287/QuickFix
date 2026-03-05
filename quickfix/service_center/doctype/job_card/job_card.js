@@ -2,9 +2,103 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Job Card", {
-	refresh(frm) {
+        onload(frm) {
+        frappe.realtime.on("job_ready", function(data) {
 
+            frappe.show_alert({
+                message: "Job is ready for delivery!",
+                indicator: "green"
+            });
+
+        });
+
+    },setup(frm){
+        frm.set_query("assigned_technician",()=>{
+            return {
+                filters:{
+                    status:"Active",
+                    specialization:frm.doc.device_type
+                }
+            }
+        })
+    },
+	refresh(frm) {
+        if (frm.doc.status) {
+
+            let color = "gray";
+
+            if (frm.doc.status === "Draft") {
+                color = "gray";
+            }
+            else if (frm.doc.status === "Pending Diagnosis") {
+                color = "orange";
+            }
+            else if (frm.doc.status === "Awaiting Customer Approval") {
+                color = "yellow";
+            }
+            else if (frm.doc.status === "In Repair") {
+                color = "blue";
+            }
+            else if (frm.doc.status === "Ready for Delivery") {
+                color = "green";
+            }
+            else if (frm.doc.status === "Delivered") {
+                color = "darkgreen";
+            }
+            else if (frm.doc.status === "Cancelled") {
+                color = "red";
+            }
+            frm.page.set_indicator(frm.doc.status, color);
+            frm.dashboard.clear_headline();
+            frm.dashboard.add_indicator(frm.doc.status, color);
+        }
+        if (frm.doc.status === "Ready for Delivery" && frm.doc.docstatus === 1){
+            frm.add_custom_button("Mark as Delivered",()=>{
+                frappe.call({
+                    method:"quickfix.api.mark_as_delivered",
+                    args:{
+                        job_card:frm.doc.name
+                    },callback:function(){
+                        frm.reload_doc();
+                    }
+                })
+            })
+        }
+        if (frappe.boot.quickfix_shop_name) {
+
+            frm.page.set_indicator(
+                frappe.boot.quickfix_shop_name,
+                "blue"
+            );
+
+        }
 	},
+    assigned_technician(frm) {
+        console.log("!!!!!!!!!!!!!!!!!!")
+        if (frm.doc.assigned_technician) {
+            console.log(frm.doc.assigned_technician)
+            frappe.db.get_value(
+                "Technician",
+                frm.doc.assigned_technician,
+                "specialization",
+                function(r) {
+
+                    if (r.specialization && r.specialization !== frm.doc.device_type) {
+
+                        frappe.msgprint({
+                            title: "Specialization Mismatch",
+                            message: "Selected technician specialization does not match the device type.",
+                            indicator: "orange"
+                        });
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
     
 });
 

@@ -87,8 +87,8 @@ class JobCard(Document):
 
 
 	def validate_ready_for_delivery(self):
-		if self.status!="Ready For Delivery":
-			frappe.throw("Job Card must be 'Ready For Delivery' before submission")
+		if self.status!="Ready for Delivery":
+			frappe.throw("Job Card must be 'Ready for Delivery' before submission")
 	
 	def check_stock(self):
 		parts={}
