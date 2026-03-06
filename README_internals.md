@@ -346,3 +346,89 @@ frappe.get_doc("Job Card", "JC-00001").customer_phone
 
 This demonstrates that hiding fields in client-side JavaScript is **not a security mechanism**. Proper security must be enforced using role permissions or server-side validation.
 
+
+### I1 – Query Report with SQL Safety
+
+
+### SQL Injection Risk (Unsafe Method)
+
+Using f-strings or string concatenation can cause SQL injection.
+
+Example (unsafe):
+
+```python
+query = f"""
+SELECT name FROM `tabJob Card`
+WHERE device_type = '{device_type}'
+"""
+```
+
+If a user enters malicious input like:
+
+```
+Mobile' OR 1=1 --
+```
+
+the query may return all records. This is called **SQL Injection**.
+
+---
+
+### Safe Parameterized Query
+
+The report uses a **parameterized SQL pattern**:
+
+```
+%(device_type)s
+```
+
+Frappe safely substitutes the value when executing:
+
+```python
+frappe.db.sql(query, filters)
+```
+
+This prevents SQL injection and ensures safe database queries.
+
+---
+### Adding an Index on status
+
+To ensure efficient filtering by status, an index was added in the Job Card DocType JSON by enabling the search_index property.
+
+```
+{
+ "fieldname": "status",
+ "fieldtype": "Select",
+ "search_index": 1
+}
+```
+This creates a database index on the status field in the tabJob Card table, improving query performance when filtering open job cards.
+
+## I4 - Prepared Reports
+
+### When to use Prepared Report vs real-time Script Report
+
+Use Prepared Report when:
+- Report takes more than 3-5 seconds (large datasets, complex aggregations)
+- Data does not need to be real-time (yesterday's stats, monthly summaries)
+- Multiple users run the same report — one cached result serves all of them
+
+Use real-time Script Report when:
+- Data must reflect current state (live stock levels, open job count right now)
+- Filters vary per user making caching ineffective
+- Report is fast enough to not block the user
+
+### Staleness tradeoff
+
+A Prepared Report is a snapshot taken at the moment the background job ran.
+If 10 Job Cards are submitted after the report generated, those are invisible
+to the user until someone triggers a new generation.
+
+For a monthly revenue summary this is acceptable.
+For a "current open jobs" count this is dangerous — use real-time instead.
+
+### Caching risk
+
+If underlying data changes between preparations, the user sees stale numbers
+with no warning other than the "Last Generated" timestamp. A manager could
+make staffing or financial decisions on hours-old data. Always document the
+refresh schedule and display the generation time prominently.

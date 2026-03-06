@@ -3,11 +3,12 @@
 
 import frappe
 from frappe.model.document import Document
-
+from frappe.model.naming import make_autoname
+from frappe.utils import cint
 
 class SparePart(Document):
 	def autoname(self):
-		self.name=self.part_code.upper()+"-"+self.make_autoname("PART-.YYYY.-.####")
+		self.name=self.part_code.upper()+"-"+make_autoname("PART-.YYYY.-.####")
 
 	def validate(self):
 		# checking selling price > unit cost
@@ -21,6 +22,7 @@ class SparePart(Document):
             None,
             "low_stock_threshold"
         )
+		threshold = cint(threshold or 0)
 		if self.stock_qty <= threshold:
 			frappe.msgprint("Stock below threshold")
 

@@ -8,7 +8,7 @@
   "part_name",
   "part_code",
   "compatible_device_type",
-  "unit_code",
+  "unit_cost",
   "selling_price",
   "stock_qty",
   "reorder_level",
@@ -36,12 +36,6 @@
    "options": "Device Type"
   },
   {
-   "fieldname": "unit_code",
-   "fieldtype": "Currency",
-   "label": "Unit Code",
-   "reqd": 1
-  },
-  {
    "fieldname": "selling_price",
    "fieldtype": "Currency",
    "label": "Selling Price ",
@@ -64,12 +58,18 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Is Active"
+  },
+  {
+   "fieldname": "unit_cost",
+   "fieldtype": "Currency",
+   "label": "Unit Cost",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-24 14:14:57.991217",
+ "modified": "2026-03-06 13:16:21.795343",
  "modified_by": "Administrator",
  "module": "Service Center",
  "name": "Spare Part",
