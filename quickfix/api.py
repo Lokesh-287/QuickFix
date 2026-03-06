@@ -104,3 +104,28 @@ def mark_as_delivered(job_card):
 @frappe.whitelist()
 def mark_ready(job_card):
     frappe.db.set_value("Job Card",job_card,"status","Ready for Delivery")
+
+
+@frappe.whitelist()
+def enqueue_technician_performance_report(filters=None):
+    """
+    Trigger a background generation of the Technician Performance Report.
+
+    We do NOT call frappe.enqueue() directly here.
+    Instead, we insert a Prepared Report document.
+    Frappe's own after_insert hook on the Prepared Report DocType
+    automatically enqueues the background job to run execute()
+    and store the result.
+    """
+    doc = frappe.get_doc({
+        "doctype": "Prepared Report",
+        "report_name": "Technician Performance Report",
+        "filters": frappe.as_json(filters or {}),
+    })
+    doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+
+    frappe.msgprint(
+        f"Report queued successfully. Prepared Report: {doc.name}"
+    )
+    return doc.name
