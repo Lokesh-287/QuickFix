@@ -431,4 +431,64 @@ For a "current open jobs" count this is dangerous — use real-time instead.
 If underlying data changes between preparations, the user sees stale numbers
 with no warning other than the "Last Generated" timestamp. A manager could
 make staffing or financial decisions on hours-old data. Always document the
-refresh schedule and display the generation time prominently.
+refresh schedule and display the generation time prominently.`
+
+## I5 - Report Builder & Custom Report
+
+### When is Report Builder appropriate?
+- Simple flat list of a single DocType with no calculations
+- Non-developer needs to create a report without writing code
+- Report only needs filtering, sorting, and column selection
+- Example: "All Job Cards for a customer" — just a filtered list, no math
+
+### When must you use Script Report?
+- Any aggregation is needed (SUM, COUNT, AVG)
+- Data comes from multiple DocTypes
+- Dynamic columns are needed (e.g. one column per Device Type)
+- Custom chart or report_summary is required
+- Permission-aware filtering via frappe.get_list is needed
+- Any computed column (e.g. Margin %, Completion Rate)
+
+### Scenario where Report Builder in production would be a mistake
+
+A manager wants a "Revenue by Technician" report.
+You build it in Report Builder because it looks like a simple Job Card list.
+
+Report Builder cannot sum revenue per technician — it just lists
+individual rows. The manager sees 500 rows instead of 10 technician
+totals and draws wrong conclusions about who is performing best.
+
+Worse — there is no error or warning. The report looks legitimate.
+Financial decisions get made on meaningless raw data.
+
+This is why any report involving business logic, calculations,
+or summarization must be a Script Report — Report Builder is
+only for simple lists, never for analytics. 
+
+## J1 - Print Format
+
+### How Frappe determines language when printing
+Frappe checks in this order:
+1. lang parameter in the print URL
+2. Language set on the User record of the person printing
+3. Default language in System Settings
+Strings in {{ _("string") }} are looked up in the Translation
+DocType for the resolved language and replaced at render time.
+
+### Pattern 1 - frappe.get_all() directly in Jinja (BAD)
+{{ frappe.get_all("Spare Part", fields=["part_name"]) }}
+Runs a DB query on every single render. Cannot be cached.
+Blocks PDF generation if query is slow. Hard to debug errors
+inside Jinja context. Never do this.
+
+### Pattern 2 - Pre-compute in before_print() (GOOD)
+def before_print(self, settings=None):
+    self.print_summary = f"{self.customer_name} - {self.device_brand}"
+
+Then in template:
+{{ doc.print_summary }}
+
+Data fetched once in Python with full error handling.
+Template only reads pre-attached values — zero DB calls.
+Easy to unit test before_print() independently.
+PDF generation is fast with no blocking queries.

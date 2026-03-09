@@ -87,7 +87,7 @@ def send_job_ready_email(job_name):
 
 @frappe.whitelist()
 def custom_get_count(doctype,filters=None,debug=False,cache=False):
-    # print("!!!!!!!!!!!!!!!!!!!!!!!11")
+    print("!!!!!!!!!!!!!!!!!!!!!!!11")
     frappe.get_doc({
         "doctype": "Audit Log",
         "doctype_name": doctype,
@@ -129,3 +129,30 @@ def enqueue_technician_performance_report(filters=None):
         f"Report queued successfully. Prepared Report: {doc.name}"
     )
     return doc.name
+
+
+@frappe.whitelist()
+def get_status_chart_data():
+
+    data = frappe.db.sql("""
+        SELECT status, COUNT(name) as count
+        FROM `tabJob Card`
+        GROUP BY status
+    """, as_dict=True)
+
+    labels = []
+    values = []
+
+    for d in data:
+        labels.append(d.status)
+        values.append(d.count)
+
+    return {
+        "labels": labels,
+        "datasets": [
+            {
+                "name": "Job Count",
+                "values": values
+            }
+        ]
+    }
