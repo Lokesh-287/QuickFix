@@ -117,3 +117,15 @@ class JobCard(Document):
 		if not self.labour_charge:
 			self.labour_charge=frappe.db.get_single_value("QuickFix Settings","default_labour_charge")
 		self.final_amount=self.parts_total+self.labour_charge
+	
+	def before_print(self, settings=None):
+		"""
+		Pre-compute data here and attach to self.
+		Never put heavy logic inside the Jinja template directly.
+		"""
+		# Required by task
+		self.print_summary = f"{self.customer_name} - {self.device_brand} {self.device_model}"
+		
+		# Pre-compute QR code as base64 here, not in template
+		
+

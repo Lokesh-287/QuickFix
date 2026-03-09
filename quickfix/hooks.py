@@ -205,6 +205,13 @@ override_doctype_class={"Job Card":"quickfix.overrides.custom_job_card.CustomJob
 override_whitelisted_methods = {
     "frappe.client.get_count":"quickfix.api.custom_get_count"
 }
+
+jinja = {
+    "methods": [
+        "quickfix.utils.jinja_methods.get_shop_name",
+        "quickfix.utils.jinja_methods.get_qr_code"
+    ]
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
