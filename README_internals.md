@@ -577,3 +577,62 @@ Examples: monthly revenue reports, bulk data migrations,
 large file processing, sending 1000 emails.
 timeout=600 or higher. If you put a heavy job in the
 short queue, it will block all short tasks behind it.
+
+## K2 - Scheduler Events & Cron
+
+### How to disable scheduler for a specific site
+
+Option 1 — via bench command:
+bench --site quickfix-dev.localhost scheduler disable
+
+Option 2 — via site_config.json:
+{
+    "pause_scheduler": 1
+}
+
+To re-enable:
+bench --site quickfix-dev.localhost scheduler enable
+
+Or remove pause_scheduler from site_config.json.
+
+### Why disable scheduler on a dev site?
+
+1. Prevent accidental emails — daily jobs like low stock
+   alerts or job ready emails would fire for real during
+   development, sending emails to real customers or managers.
+
+2. Prevent duplicate data — scheduled jobs that insert
+   records (Audit Log entries, revenue reports) would
+   create noise in your dev database making it hard to
+   test cleanly.
+
+3. Prevent stock changes — any scheduled job that modifies
+   inventory or financial data would corrupt your test data.
+
+4. Performance — scheduler adds background load. On a
+   dev machine you want all resources for active development,
+   not background jobs.
+
+Rule of thumb: always disable scheduler on dev sites
+unless you are specifically testing scheduler behavior.
+
+### What happens to scheduled jobs when worker was down?
+
+Short answer: MISSED jobs do NOT run when worker comes back.
+
+Detailed explanation:
+- Frappe's scheduler runs on a heartbeat — it checks every
+  minute if any scheduled job is due
+- If the worker process was down for 2 hours and a daily
+  job was scheduled during that time, the scheduler will
+  NOT retroactively run it when the worker restarts
+- The scheduler only asks "is this job due RIGHT NOW?"
+  not "was this job missed while I was down?"
+- This means: if your worker crashed at 1am and restarted
+  at 3am, and your monthly report was scheduled for 2am,
+  it will NOT run until next month at 2am
+
+Exception: if the job was already enqueued in Redis before
+the worker went down, it WILL run when the worker comes
+back — because it's sitting in the Redis queue waiting.
+But if the scheduler never got to enqueue it, it is missed.
