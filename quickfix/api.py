@@ -209,3 +209,91 @@ def deliberate_failing_job():
     """
     frappe.logger("quickfix").info("Deliberate failing job started")
     raise Exception("This is a deliberate failure for Task D demonstration")
+
+###      K3 - Performance Engineering
+## Task B - Bulk operations:
+## 1. Cancel 1000 Draft Job Cards — single SQL UPDATE
+
+# def cancel_old_draft_job_cards():
+#     frappe.db.sql("""
+#         UPDATE `tabJob Card`
+#         SET
+#             status = 'Cancelled',
+#             modified = NOW(),
+#             modified_by = 'Administrator'
+#         WHERE
+#             status = 'Draft'
+#             AND creation < DATE_SUB(NOW(), INTERVAL 30 DAY)
+#         LIMIT 1000
+#     """)
+#     frappe.db.commit()
+
+## 2. Insert 500 Audit Logs — bulk_insert
+
+# def insert_audit_logs_bulk():
+
+    # logs = []
+
+    # for i in range(500):
+    #     logs.append((
+    #         str(uuid.uuid4()),  # name
+    #         "Cancel Job Card",  # action
+    #         frappe.session.user # user
+    #     ))
+
+    # frappe.db.bulk_insert(
+    #     "Audit Log",
+    #     ["name", "action", "user"],
+    #     logs
+    # )
+
+    # # frappe.db.commit()
+
+    # print("500 Audit Logs inserted using bulk_insert")
+
+## 3. Benchmark — run in bench console
+
+## import time
+# import frappe
+
+# start = time.time()
+
+# for i in range(500):
+#     log = frappe.get_doc({
+#         "doctype": "Audit Log",
+#         "action": "Test Insert",
+#         "user": frappe.session.user
+#     })
+#     log.insert()
+
+# frappe.db.commit()
+
+# end = time.time()
+
+# print("Time using insert():", end - start)
+# ------------------------------
+# import time
+# import uuid
+
+# start = time.time()
+
+# logs = []
+
+# for i in range(500):
+#     logs.append((
+#         str(uuid.uuid4()),
+#         "Test Bulk Insert",
+#         frappe.session.user
+#     ))
+
+# frappe.db.bulk_insert(
+#     "Audit Log",
+#     ["name", "action", "user"],
+#     logs
+# )
+
+# frappe.db.commit()
+
+# end = time.time()
+
+# print("Time using bulk_insert():", end - start)

@@ -313,3 +313,16 @@ app_include_js = "quickfix.bundle.js"
 
 on_session_creation="quickfix.sessions.on_session_creation"
 on_logout="quickfix.sessions.on_logout"
+
+
+scheduler_events={
+    "daily":[
+        "quickfix.api.check_low_stock"
+    ],
+    # Cron format: 1st of every month at 2am
+    # "corn":{
+    #     "0 2 1 * *": [
+    #         "quickfix.api.generate_monthly_revenue_report"
+    #     ]
+    # }
+}
