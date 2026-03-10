@@ -78,6 +78,8 @@ def get_job_cards_safe():
 @frappe.whitelist()
 def send_job_ready_email(job_name):
     job = frappe.get_doc("Job Card", job_name)
+    if not job.customer_email:
+        return
     frappe.sendmail(
         recipients=[job.owner],
         subject="Job Ready",
@@ -156,3 +158,54 @@ def get_status_chart_data():
             }
         ]
     }
+from frappe.utils import today
+@frappe.whitelist()
+def check_low_stock():
+    last_run=frappe.db.get_value(
+        "Audit Log",{
+            "action":"low_stock_check",
+            "creation":[">=",today()]
+        },"name"
+    )
+    if last_run:
+        return # already Ran today ,skip
+    
+    settings=frappe.get_single("QuickFix Settings")
+    low_stock_parts=frappe.get_list(
+        "Spare Part",
+        filters=[
+        ["stock_qty","<=",settings.low_stock_threshold or 5],
+        ["is_active","=",1]
+        ],
+        fields=["name","part_name","stock_qty","reorder_level"] 
+                    )
+    if low_stock_parts and settings.low_stock_alert_enabled and settings.manager_email:
+        part_list = "".join(
+            f"<li>{p.part_name} — Stock: {p.stock_qty}, Reorder at: {p.reorder_level}</li>"
+            for p in low_stock_parts
+        )
+        frappe.sendmail(
+            recipients=[settings.manager_email],
+            subject="QuickFix Low Stock Alert",
+            message=f"<p>Parts below reorder level:</p><ul>{part_list}</ul>"
+        )
+
+    frappe.get_doc({
+        "doctype": "Audit Log",
+        "doctype_name": "Spare Part",
+        "document_name": "low_stock_check",
+        "action": "low_stock_check",
+        "user": frappe.session.user,
+    }).insert(ignore_permissions=True)
+    frappe.db.commit()
+
+@frappe.whitelist()
+def deliberate_failing_job():
+    """
+    Deliberately fails to demonstrate:
+    - Error Log creation
+    - RQ Failed Jobs
+    - Retry behavior
+    """
+    frappe.logger("quickfix").info("Deliberate failing job started")
+    raise Exception("This is a deliberate failure for Task D demonstration")
