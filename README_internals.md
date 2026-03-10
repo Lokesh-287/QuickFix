@@ -492,3 +492,88 @@ Data fetched once in Python with full error handling.
 Template only reads pre-attached values — zero DB calls.
 Easy to unit test before_print() independently.
 PDF generation is fast with no blocking queries.
+
+## J2 - Raw Print vs HTML to PDF
+
+### Difference between Raw Printing and HTML-PDF via WeasyPrint
+
+**Raw Printing (ESC/POS):**
+Raw printing sends binary ESC/POS commands directly to a thermal
+printer over USB, serial, or network. The printer interprets these
+commands itself — there is no HTML, no CSS, no browser involved.
+Example command: ESC @ resets the printer, ESC E 1 enables bold.
+This is used for 80mm receipt printers in shops and restaurants.
+Frappe does not natively support ESC/POS — you would need a
+separate service (like a local print server or browser extension)
+to bridge Frappe's output to the printer.
+
+**HTML-PDF via WeasyPrint:**
+Frappe renders the Jinja template to HTML on the server, then
+passes that HTML to WeasyPrint which converts it to a PDF file.
+WeasyPrint is a Python library that implements a subset of CSS —
+it does NOT use a browser engine. The PDF is then sent to the
+browser for download or printing via the browser's print dialog.
+
+Key difference: Raw printing talks directly to hardware.
+WeasyPrint produces a PDF file from HTML/CSS on the server.
+
+---
+
+### 3 CSS properties that work in browser but fail in WeasyPrint
+
+1. **CSS Grid (`display: grid`)**
+   WeasyPrint has very limited or no support for CSS Grid.
+   Use `display: table` or `<table>` elements instead.
+
+2. **`position: fixed`**
+   Fixed positioning is ignored in WeasyPrint — elements do not
+   stay in place relative to the page. Use `@page` margins for
+   headers/footers instead.
+
+3. **CSS Flexbox (`display: flex`)**
+   Flexbox support in WeasyPrint is partial and unreliable.
+   Complex flex layouts break silently — use tables instead.
+
+---
+
+### format_value() — with vs without
+
+**Without format_value (raw value):**
+{{ doc.final_amount }}
+Output: 13100.0
+Problem: No currency symbol, no thousands separator,
+shows raw float — looks unprofessional and confusing.
+
+**With get_formatted() (correct):**
+{{ doc.get_formatted("final_amount") }}
+Output: ₹ 13,100.00
+Correct: Currency symbol, thousands separator, 2 decimal places,
+respects the system currency settings.
+
+This is why every numeric Currency field in a print format
+must use get_formatted() — never output raw float values.
+
+## K1 - Background Jobs
+
+### Task A — The 3 Queue Names
+
+**short queue:**
+For fast tasks that complete in under 5 minutes.
+Examples: sending a single email, sending a webhook,
+publishing a small notification.
+Why separate: a short email task must not sit behind a
+30-minute report generation job. Short queue workers
+pick up only short queue jobs — guaranteed fast execution.
+
+**default queue:**
+For medium tasks that complete in 5–15 minutes.
+Examples: processing a batch of records, generating
+a small report, syncing data with an external API.
+This is the queue used when no queue is specified.
+
+**long queue:**
+For heavy tasks that can take 15 minutes or more.
+Examples: monthly revenue reports, bulk data migrations,
+large file processing, sending 1000 emails.
+timeout=600 or higher. If you put a heavy job in the
+short queue, it will block all short tasks behind it.

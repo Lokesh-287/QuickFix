@@ -10,6 +10,7 @@ class JobCard(Document):
 		if not self.labour_charge:
 			self.labour_charge=frappe.db.get_single_value("QuickFix Settings","default_labour_charge")
 
+
 	def validate(self):
 		self.check_customer_phone()
 		self.check_status()
@@ -23,7 +24,7 @@ class JobCard(Document):
 		self.update_stock()
 		self.create_invoice()
 		self.send_socket_notification()
-		frappe.enqueue("quickfix.api.send_job_ready_email",job_name=self.name,queue="short")
+		frappe.enqueue("quickfix.api.send_job_ready_email",job_name=self.name,queue="short",timeout=300,now=False)
 
 	def on_cancel(self):
 		self.status="Cancelled"
@@ -117,6 +118,7 @@ class JobCard(Document):
 		if not self.labour_charge:
 			self.labour_charge=frappe.db.get_single_value("QuickFix Settings","default_labour_charge")
 		self.final_amount=self.parts_total+self.labour_charge
+		self.dummy=self.final_amount
 	
 	def before_print(self, settings=None):
 		"""
@@ -125,7 +127,7 @@ class JobCard(Document):
 		"""
 		# Required by task
 		self.print_summary = f"{self.customer_name} - {self.device_brand} {self.device_model}"
-		
+		print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		# Pre-compute QR code as base64 here, not in template
 		
 
