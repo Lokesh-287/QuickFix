@@ -1024,3 +1024,57 @@ Server Scripts are stored in the database rather than version-controlled files. 
 - Risk of hidden logic affecting system behavior.
 
 For long-term maintainability, important logic should be implemented in application code rather than server scripts.
+
+
+### M2 - Caching, Redis & Cache Invalidation
+## Task A
+
+
+## 5 Things Frappe Caches in Redis
+
+**1. bootinfo**
+Stored as a Redis Hash (`frappe.cache.hget("bootinfo", "Administrator")`). Contains the full desk startup payload — user roles, permission sets (can_create, can_read, can_write, can_submit, can_cancel, can_delete), system defaults, workspaces, reports, letter heads, and app versions. Built once per user per session. Invalidated by `frappe.clear_cache()` or logout.
+
+**2. DocType metadata / meta**
+Keys: `doctype_meta`, `metadata_version`. Stores the serialised meta object for every DocType — field definitions, naming series, controller path, and permission rules. Frappe reads this instead of querying `tabDocType` on every form open. `metadata_version` is bumped on every `bench migrate` or DocType save to signal workers to drop their local cache.
+
+**3. Website context**
+Keys: `document_cache::Workspace::QuickFix`, `document_cache::Workspace::Build`, `document_cache::Website Theme::Standard`. Stores serialised Workspace layouts, Website Theme, and portal settings. Read on every desk page load to render the sidebar and shortcuts. Invalidated when the document is saved.
+
+**4. Translations**
+Keys: `lang_user_translations`, `merged_translations`. `lang_user_translations` holds custom Translation records. `merged_translations` is the final merged dict — Frappe core strings + app strings + user overrides for the active language. The `__messages` dict inside bootinfo is the browser copy of this cache. Invalidated when a Translation record is saved.
+
+**5. User permissions**
+Keys: `roles`, `domain_restricted_doctypes`, `_user_settings`. `roles` caches all Role names so Frappe never hits `tabRole` on every request. `domain_restricted_doctypes` caches which DocTypes are hidden per active domain. `_user_settings` stores per-user column preferences and saved filters. Invalidated by role changes or `frappe.clear_cache()`.
+
+### Task B - Custom cache with expiry + invalidation:
+
+Using Redis caching improves performance by reducing database queries for frequently accessed dashboard data. However, without proper cache invalidation, users may see stale data. Implementing cache invalidation using DocType events ensures that the UI always displays up-to-date information.
+
+## Task C – Debugging Stale UI
+
+### Stale JavaScript after a change
+
+Sometimes after modifying a JavaScript file, the browser may still load the old version because Frappe caches built assets.
+
+To rebuild assets and load the latest JS:
+
+```
+bench build --app quickfix
+```
+
+`bench build --app quickfix` rebuilds the JavaScript and CSS files for the **quickfix** app so the browser loads the updated code.
+
+---
+
+### Stale DocType Metadata
+
+After modifying a DocType (for example changing a field label), users may still see old values because DocType metadata is cached.
+
+To clear this metadata cache:
+
+```
+bench clear-cache
+```
+
+This command clears the server cache and reloads updated DocType metadata such as field labels, properties, and permissions.
