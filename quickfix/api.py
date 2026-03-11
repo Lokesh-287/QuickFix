@@ -297,3 +297,39 @@ def deliberate_failing_job():
 # end = time.time()
 
 # print("Time using bulk_insert():", end - start)
+
+from frappe.utils import getdate
+
+@frappe.whitelist(allow_guest=True)
+def get_job_summary():
+    
+    # Read parameter from request
+    job_card_name = frappe.form_dict.get("job_card_name")
+
+    if not job_card_name:
+        frappe.local.response["http_status_code"] = 400
+        return {"error": "job_card_name parameter required"}
+
+    # Check if job exists
+    if not frappe.db.exists("Job Card", job_card_name):
+        frappe.local.response["http_status_code"] = 404
+        return {"error": "Not found"}
+
+    # Fetch only required fields (avoid sensitive fields)
+    job = frappe.db.get_value(
+        "Job Card",
+        job_card_name,
+        ["name", "status", "assigned_technician", "creation", "modified"],
+        as_dict=True
+    )
+
+    # Convert creation to Python date object
+    created_date = getdate(job.creation)
+
+    # Return summary dict
+    return {
+        "job_card": job.name,
+        "status": job.status,
+        "technician": job.assigned_technician,
+        "created_date": created_date
+    }

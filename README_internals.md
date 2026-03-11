@@ -932,6 +932,8 @@ DELETE http://quickfix-dev.localhost:8000/api/resource/Spare%20Part/BAT001-PART-
     "data": "ok"
 }
 ```
+### Task B 
+
 
 ### Difference between Session Cookie Authentication and Token Authentication
 Session Cookie Authentication:
@@ -947,3 +949,11 @@ Token Authentication:
 ---
 ### Appropriate UsageBrowser Applications → Session Cookie Authentication
 Server-to-Server APIs → Token Authentication
+
+### Task C - Custom Whitelisted Method
+
+A whitelisted method `get_job_summary` was created in `api.py`.
+It reads `job_card_name` using `frappe.form_dict` and returns only selected fields (job_card, status, technician, created_date).
+Sensitive fields like `customer_email` are not returned.
+If the job card does not exist, it returns `{"error": "Not found"}` with HTTP 404.
+The Python date object is automatically serialized by Frappe to JSON format (e.g., `"2026-03-06"`).
