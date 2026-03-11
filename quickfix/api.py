@@ -333,3 +333,36 @@ def get_job_summary():
         "technician": job.assigned_technician,
         "created_date": created_date
     }
+
+import time
+
+@frappe.whitelist(allow_guest=True)
+def get_job_by_phone():
+
+    phone = frappe.form_dict.get("phone")
+
+    # get client IP
+    ip = frappe.local.request_ip
+
+    cache = frappe.cache()
+
+    # key per IP per minute
+    minute = int(time.time() / 60)
+    key = f"rate_limit:{ip}:{minute}"
+
+    count = cache.get_value(key) or 0
+
+    # limit: 10 requests per minute
+    if int(count) >= 10:
+        frappe.local.response["http_status_code"] = 429
+        return {"error": "Too many requests"}
+
+    cache.set_value(key, int(count) + 1, expires_in_sec=60)
+
+    jobs = frappe.get_all(
+        "Job Card",
+        filters={"customer_phone": phone},
+        fields=["name", "status", "assigned_technician"]
+    )
+
+    return {"jobs": jobs}
