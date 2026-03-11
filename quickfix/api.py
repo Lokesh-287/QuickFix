@@ -297,3 +297,72 @@ def deliberate_failing_job():
 # end = time.time()
 
 # print("Time using bulk_insert():", end - start)
+
+from frappe.utils import getdate
+
+@frappe.whitelist(allow_guest=True)
+def get_job_summary():
+    
+    # Read parameter from request
+    job_card_name = frappe.form_dict.get("job_card_name")
+
+    if not job_card_name:
+        frappe.local.response["http_status_code"] = 400
+        return {"error": "job_card_name parameter required"}
+
+    # Check if job exists
+    if not frappe.db.exists("Job Card", job_card_name):
+        frappe.local.response["http_status_code"] = 404
+        return {"error": "Not found"}
+
+    # Fetch only required fields (avoid sensitive fields)
+    job = frappe.db.get_value(
+        "Job Card",
+        job_card_name,
+        ["name", "status", "assigned_technician", "creation", "modified"],
+        as_dict=True
+    )
+
+    # Convert creation to Python date object
+    created_date = getdate(job.creation)
+
+    # Return summary dict
+    return {
+        "job_card": job.name,
+        "status": job.status,
+        "technician": job.assigned_technician,
+        "created_date": created_date
+    }
+
+import time
+
+@frappe.whitelist(allow_guest=True)
+def get_job_by_phone():
+
+    phone = frappe.form_dict.get("phone")
+
+    # get client IP
+    ip = frappe.local.request_ip
+
+    cache = frappe.cache()
+
+    # key per IP per minute
+    minute = int(time.time() / 60)
+    key = f"rate_limit:{ip}:{minute}"
+
+    count = cache.get_value(key) or 0
+
+    # limit: 10 requests per minute
+    if int(count) >= 10:
+        frappe.local.response["http_status_code"] = 429
+        return {"error": "Too many requests"}
+
+    cache.set_value(key, int(count) + 1, expires_in_sec=60)
+
+    jobs = frappe.get_all(
+        "Job Card",
+        filters={"customer_phone": phone},
+        fields=["name", "status", "assigned_technician"]
+    )
+
+    return {"jobs": jobs}
