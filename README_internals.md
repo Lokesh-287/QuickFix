@@ -957,3 +957,70 @@ It reads `job_card_name` using `frappe.form_dict` and returns only selected fiel
 Sensitive fields like `customer_email` are not returned.
 If the job card does not exist, it returns `{"error": "Not found"}` with HTTP 404.
 The Python date object is automatically serialized by Frappe to JSON format (e.g., `"2026-03-06"`).
+
+### Task D – Rate Limiting & Abuse Protection
+
+The `get_job_by_phone` API uses `allow_guest=True`, so a rate limiter was implemented using `frappe.cache`.
+Requests are tracked per **IP address per minute**, and if the number exceeds the limit, the API returns **HTTP 429 (Too Many Requests)**.
+
+Risks of `allow_guest=True` endpoints:
+
+1. **Brute force attacks** – attackers can try many phone numbers to access data.
+2. **API abuse / DoS** – sending large numbers of requests can overload the server.
+3. **Data scraping** – attackers may automatically collect large amounts of data from the API.
+
+## M1 – Server Script DocType
+
+### Blocked Python functions/modules in Server Script sandbox
+
+Server Scripts run inside a restricted sandbox environment in Frappe. Dangerous Python modules and functions are blocked for security reasons.
+
+Examples of blocked modules/functions:
+- os module (cannot access operating system commands)
+- subprocess module (cannot run system processes)
+- sys module (restricted system access)
+- open() file operations (cannot read/write files on the server)
+- eval() and exec() for arbitrary code execution
+
+These restrictions prevent server scripts from executing unsafe operations or accessing the system environment.
+
+---
+
+### Three things you CANNOT do in a Server Script but can do in App Code
+
+1. Access the file system using open(), os, or file operations.
+2. Import and use arbitrary Python libraries or external packages.
+3. Execute system-level commands using subprocess or os.system().
+
+These operations are only possible in full app code where there are no sandbox restrictions.
+
+---
+
+### Two scenarios where Server Scripts are acceptable
+
+1. Implementing simple business rules such as automatically updating a field value when a condition is met.
+2. Creating lightweight API endpoints for simple data retrieval or quick automation.
+
+Server Scripts are useful for quick customizations without modifying the application code.
+
+---
+
+### Two scenarios where App Code should be used instead
+
+1. Complex business logic or workflows involving multiple operations.
+2. Integrations with external systems or APIs requiring authentication or background processing.
+
+These cases require proper application code for reliability and maintainability.
+
+---
+
+### Governance and Maintainability Risks of Server Scripts
+
+Server Scripts are stored in the database rather than version-controlled files. This creates governance risks such as:
+
+- Changes not being tracked in Git.
+- Difficult migration between development, staging, and production environments.
+- Harder code review and auditing.
+- Risk of hidden logic affecting system behavior.
+
+For long-term maintainability, important logic should be implemented in application code rather than server scripts.
