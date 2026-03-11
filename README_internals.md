@@ -933,3 +933,17 @@ DELETE http://quickfix-dev.localhost:8000/api/resource/Spare%20Part/BAT001-PART-
 }
 ```
 
+### Difference between Session Cookie Authentication and Token Authentication
+Session Cookie Authentication:
+- Requires login using `/api/method/login`
+- Returns a session cookie (`sid`)
+- Browser stores and automatically sends the cookie
+- Used mainly for **browser-based applications** like Frappe Desk.
+Token Authentication:
+- Uses **API Key and API Secret**
+- Sent in request header: `Authorization: token api_key:api_secret`
+- Does not require login session
+- Used mainly for **server-to-server communication**, scripts, or external integrations.
+---
+### Appropriate UsageBrowser Applications → Session Cookie Authentication
+Server-to-Server APIs → Token Authentication
