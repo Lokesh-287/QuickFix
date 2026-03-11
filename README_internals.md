@@ -722,3 +722,214 @@ After running the report, the console logs were inspected to see the queries exe
 The slowest operation was the query filtering Job Cards by the `creation` date because, without an index, the database may perform a **full table scan**.
 
 To improve performance, an **index was added to the `creation` field**. This allows the database to quickly find records within the date range, which improves the report execution speed.
+
+Here it is — headings and actual request/response only, no explanations:
+
+---
+
+## L1 – Task A: REST Resource API
+
+---
+
+### 1. GET – List Job Cards
+
+```
+GET http://quickfix-dev.localhost:8000/api/resource/Job%20Card
+```
+
+```json
+{
+    "data": [
+        { "name": "JC-2026-00041" },
+        { "name": "JC-2026-00042" },
+        { "name": "JC-2026-00043" },
+        { "name": "JC-2026-00051" },
+        { "name": "JC-2026-00052" },
+        { "name": "JC-2026-00053" },
+        { "name": "JC-2026-00054" },
+        { "name": "JC-2026-00055" },
+        { "name": "JC-2026-00056" },
+        { "name": "JC-2026-00057" },
+        { "name": "JC-2026-00058" },
+        { "name": "JC-2026-00059" },
+        { "name": "JC-2026-00060" },
+        { "name": "JC-2026-00061" },
+        { "name": "JC-2026-00062" },
+        { "name": "JC-2026-00063" },
+        { "name": "JC-2026-00064" },
+        { "name": "JC-2026-00065" },
+        { "name": "JC-2026-00066" },
+        { "name": "JC-2026-00067" }
+    ]
+}
+```
+
+---
+
+### 2. GET – Single Job Card
+
+```
+GET http://quickfix-dev.localhost:8000/api/resource/Job%20Card/JC-2026-00072
+```
+
+```json
+{
+    "data": {
+        "name": "JC-2026-00072",
+        "owner": "Administrator",
+        "creation": "2026-03-06 14:46:35.472304",
+        "modified": "2026-03-06 14:46:35.472304",
+        "modified_by": "Administrator",
+        "docstatus": 0,
+        "idx": 0,
+        "customer_name": "Customer 22",
+        "customer_phone": "8219992658",
+        "device_type": "Tablet",
+        "device_model": "Model-846",
+        "problem_description": "Auto generated repair issue",
+        "assigned_technician": "TECH-0001",
+        "estimated_cost": 0.0,
+        "priority": "Normal",
+        "parts_total": 17200.0,
+        "labour_charge": 500.0,
+        "final_amount": 17700.0,
+        "payment_status": "Paid",
+        "status": "Awaiting Customer Approval",
+        "doctype": "Job Card",
+        "parts_used": [
+            {
+                "name": "4k283edacs",
+                "idx": 1,
+                "part": "RAM002-PART-2026-0030",
+                "part_name": "Laptop RAM 16GB",
+                "unit_price": 5000.0,
+                "quantity": 2.0,
+                "total_price": 10000.0,
+                "parent": "JC-2026-00072",
+                "parentfield": "parts_used",
+                "parenttype": "Job Card",
+                "doctype": "Part Usage Entry"
+            },
+            {
+                "name": "4k2bq4o3hp",
+                "idx": 2,
+                "part": "SSD002-PART-2026-0017",
+                "part_name": "Laptop SSD 512GB",
+                "unit_price": 6000.0,
+                "quantity": 1.0,
+                "total_price": 6000.0,
+                "parent": "JC-2026-00072",
+                "parentfield": "parts_used",
+                "parenttype": "Job Card",
+                "doctype": "Part Usage Entry"
+            },
+            {
+                "name": "4k2cueq0e1",
+                "idx": 3,
+                "part": "SPK001-PART-2026-0009",
+                "part_name": "Speaker",
+                "unit_price": 400.0,
+                "quantity": 3.0,
+                "total_price": 1200.0,
+                "parent": "JC-2026-00072",
+                "parentfield": "parts_used",
+                "parenttype": "Job Card",
+                "doctype": "Part Usage Entry"
+            }
+        ]
+    }
+}
+```
+
+---
+
+### 3. POST – Create a Spare Part
+
+```
+POST http://quickfix-dev.localhost:8000/api/resource/Spare%20Part
+```
+
+```json
+{
+    "part_name":     "Laptop Battery",
+    "part_code":     "BAT001",
+    "unit_cost":     800,
+    "selling_price": 1200,
+    "stock_qty":     10
+}
+```
+
+```json
+{
+    "data": {
+        "name": "BAT001-PART-2026-0031",
+        "owner": "Administrator",
+        "creation": "2026-03-11 11:35:32.092501",
+        "modified": "2026-03-11 11:35:32.092501",
+        "modified_by": "Administrator",
+        "docstatus": 0,
+        "idx": 0,
+        "part_name": "Laptop Battery",
+        "part_code": "BAT001",
+        "unit_cost": 800.0,
+        "selling_price": 1200.0,
+        "stock_qty": 10.0,
+        "reorder_level": 5.0,
+        "is_active": 1,
+        "doctype": "Spare Part"
+    }
+}
+```
+
+---
+
+### 4. PUT – Update a Spare Part
+
+```
+PUT http://quickfix-dev.localhost:8000/api/resource/Spare%20Part/RAM002-PART-2026-0030
+```
+
+```json
+{
+    "selling_price": 15000
+}
+```
+
+```json
+{
+    "data": {
+        "name": "RAM002-PART-2026-0030",
+        "owner": "Administrator",
+        "creation": "2026-03-06 13:25:28.066013",
+        "modified": "2026-03-11 11:40:29.242413",
+        "modified_by": "Administrator",
+        "docstatus": 0,
+        "idx": 0,
+        "part_name": "Laptop RAM 16GB",
+        "part_code": "RAM002",
+        "compatible_device_type": "Laptop",
+        "unit_cost": 3500.0,
+        "selling_price": 15000.0,
+        "stock_qty": 5.0,
+        "reorder_level": 5.0,
+        "is_active": 1,
+        "doctype": "Spare Part"
+    },
+    "_server_messages": "[\"{\\\"message\\\": \\\"Stock below threshold\\\", \\\"title\\\": \\\"Message\\\"}\"]"
+}
+```
+
+---
+
+### 5. DELETE – Delete a Spare Part
+
+```
+DELETE http://quickfix-dev.localhost:8000/api/resource/Spare%20Part/BAT001-PART-2026-0031
+```
+
+```json
+{
+    "data": "ok"
+}
+```
+
