@@ -326,3 +326,9 @@ scheduler_events={
     #     ]
     # }
 }
+
+doc_events = {
+    "Job Card": {
+        "on_update": "quickfix.cache_utils.clear_status_chart_cache"
+    }
+}

@@ -133,31 +133,45 @@ def enqueue_technician_performance_report(filters=None):
     return doc.name
 
 
-@frappe.whitelist()
-def get_status_chart_data():
+# @frappe.whitelist()
+# def get_status_chart_data():
 
-    data = frappe.db.sql("""
-        SELECT status, COUNT(name) as count
-        FROM `tabJob Card`
-        GROUP BY status
-    """, as_dict=True)
+#     data = frappe.db.sql("""
+#         SELECT status, COUNT(name) as count
+#         FROM `tabJob Card`
+#         GROUP BY status
+#     """, as_dict=True)
 
-    labels = []
-    values = []
+#     labels = []
+#     values = []
 
-    for d in data:
-        labels.append(d.status)
-        values.append(d.count)
+#     for d in data:
+#         labels.append(d.status)
+#         values.append(d.count)
 
-    return {
-        "labels": labels,
-        "datasets": [
-            {
-                "name": "Job Count",
-                "values": values
-            }
-        ]
-    }
+#     # return {
+#     #     "labels": labels,
+#     #     "datasets": [
+#     #         {
+#     #             "name": "Job Count",
+#     #             "values": values
+#     #         }
+#     #     ]
+#     # }
+#     result = {
+#         "labels": labels,
+#         "datasets": [
+#             {
+#                 "name": "Job Status",
+#                 "values": values
+#             }
+#         ]
+#     }
+
+#     # cache for 300 seconds
+#     frappe.cache().set_value(cache_key, result, expires_in_sec=300)
+
+#     return result
 from frappe.utils import today
 @frappe.whitelist()
 def check_low_stock():

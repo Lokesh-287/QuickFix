@@ -957,7 +957,7 @@ It reads `job_card_name` using `frappe.form_dict` and returns only selected fiel
 Sensitive fields like `customer_email` are not returned.
 If the job card does not exist, it returns `{"error": "Not found"}` with HTTP 404.
 The Python date object is automatically serialized by Frappe to JSON format (e.g., `"2026-03-06"`).
-After modifying a DocType (for example changing a field label), users may still see old values because DocType metadata is cached.
+
 
 ### Task D – Rate Limiting & Abuse Protection
 
@@ -1079,6 +1079,7 @@ bench clear-cache
 ```
 
 This command clears the server cache and reloads updated DocType metadata such as field labels, properties, and permissions.
+
 
 
 
