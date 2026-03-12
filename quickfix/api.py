@@ -386,63 +386,95 @@ import hmac
 import hashlib
 import json
 
+# @frappe.whitelist(allow_guest=True)
+# def payment_webhook():
+
+#     # 1. Read raw request body
+#     payload = frappe.request.data
+
+#     # 2. Validate HMAC signature
+#     secret = frappe.conf.get("payment_webhook_secret", "")
+#     signature = frappe.get_request_header("X-Signature")
+
+#     expected = hmac.new(
+#         secret.encode(),
+#         payload,
+#         hashlib.sha256
+#     ).hexdigest()
+
+#     if not hmac.compare_digest(expected, signature or ""):
+#         frappe.throw("Invalid signature", frappe.AuthenticationError)
+
+#     # 3. Parse payload
+#     data = json.loads(payload)
+
+#     reference = data.get("ref")
+
+#     # 4. Deduplication check
+#     if frappe.db.exists(
+#         "Audit Log",
+#         {
+#             "action": "payment_received",
+#             "document_name": reference
+#         }
+#     ):
+#         return {
+#             "status": "duplicate",
+#             "message": "Already processed"
+#         }
+
+#     # 5. Update Job Card or Service Invoice
+#     if frappe.db.exists("Job Card", reference):
+
+#         job = frappe.get_doc("Job Card", reference)
+#         job.payment_status = "Paid"
+#         job.save(ignore_permissions=True)
+
+#     # 6. Log event to Audit Log
+#     audit = frappe.get_doc({
+#         "doctype": "Audit Log",
+#         "action": "payment_received",
+#         "document_name": reference,
+#         "status": "Success"
+#     })
+
+#     audit.insert(ignore_permissions=True)
+
+#     frappe.db.commit()
+
+#     return {
+#         "status": "ok",
+#         "message": "Payment processed"
+#     }
+
 @frappe.whitelist(allow_guest=True)
 def payment_webhook():
 
-    # 1. Read raw request body
-    payload = frappe.request.data
+    logger = frappe.logger("quickfix")
 
-    # 2. Validate HMAC signature
-    secret = frappe.conf.get("payment_webhook_secret", "")
-    signature = frappe.get_request_header("X-Signature")
+    try:
+        logger.info("Payment webhook triggered")
 
-    expected = hmac.new(
-        secret.encode(),
-        payload,
-        hashlib.sha256
-    ).hexdigest()
+        payload = frappe.request.data
+        logger.info(f"Received payload: {payload}")
 
-    if not hmac.compare_digest(expected, signature or ""):
-        frappe.throw("Invalid signature", frappe.AuthenticationError)
+        signature = frappe.get_request_header("X-Signature")
 
-    # 3. Parse payload
-    data = json.loads(payload)
+        if not signature:
+            logger.warning("Missing X-Signature header")
+            frappe.throw("Invalid request")
 
-    reference = data.get("ref")
+        # Example processing
+        logger.info("Processing payment confirmation")
 
-    # 4. Deduplication check
-    if frappe.db.exists(
-        "Audit Log",
-        {
-            "action": "payment_received",
-            "document_name": reference
-        }
-    ):
-        return {
-            "status": "duplicate",
-            "message": "Already processed"
-        }
+        return {"status": "success"}
 
-    # 5. Update Job Card or Service Invoice
-    if frappe.db.exists("Job Card", reference):
+    except Exception:
+        logger.error("Error occurred in payment webhook")
 
-        job = frappe.get_doc("Job Card", reference)
-        job.payment_status = "Paid"
-        job.save(ignore_permissions=True)
+        frappe.log_error(
+            title="Payment Webhook Failure",
+            message=frappe.get_traceback()
+        )
 
-    # 6. Log event to Audit Log
-    audit = frappe.get_doc({
-        "doctype": "Audit Log",
-        "action": "payment_received",
-        "document_name": reference,
-        "status": "Success"
-    })
-
-    audit.insert(ignore_permissions=True)
-
-    frappe.db.commit()
-
-    return {
-        "status": "ok",
-        "message": "Payment processed"
-    }
+        return {"status": "error"}

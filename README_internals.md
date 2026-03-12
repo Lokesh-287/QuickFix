@@ -1115,3 +1115,19 @@ This ensures:
 * Safe update of Job Card payment status
 * Audit logging for traceability
 
+Here is the **short 5–6 line answer version** you can directly submit:
+
+---
+### M3 - Logging, Error Handling & Observability
+### Task B – Error Snapshots
+
+A background job with an unhandled exception was triggered using `frappe.enqueue()`. When the job failed, Frappe automatically created an error snapshot which can be viewed in **Setup → Error Log**. An **Error Log** record contains fields like **Error/Traceback (stack trace), Method, Reference DocType, Reference Name, Creation time, and Owner**.
+
+The failed background job can also be seen in the **RQ Dashboard (`/rq`)** under **Failed Jobs**. From there, the job can be retried by clicking **Requeue**, which sends the job back to the queue for execution again.
+
+---
+
+**Task C – Production Debugging Pattern (Short Version)**
+
+If a bug occurs only in production, first check **Setup → Error Log** to view the traceback and identify where the error occurred. Then review the **Audit Log** to see what user action or document change triggered the issue. Next, inspect the **`frappe.logger("quickfix")` logs** in `sites/{site}/logs/quickfix.log` to trace application events. By matching **timestamps across Error Log, Audit Log, and logger output**, the root cause can be identified without enabling `developer_mode`.
+
