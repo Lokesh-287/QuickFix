@@ -4,7 +4,7 @@
 frappe.ui.form.on("Job Card", {
         onload(frm) {
         frappe.realtime.on("job_ready", function(data) {
-
+            
             frappe.show_alert({
                 message: "Job is ready for delivery!",
                 indicator: "green"
