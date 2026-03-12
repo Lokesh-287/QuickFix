@@ -958,6 +958,7 @@ Sensitive fields like `customer_email` are not returned.
 If the job card does not exist, it returns `{"error": "Not found"}` with HTTP 404.
 The Python date object is automatically serialized by Frappe to JSON format (e.g., `"2026-03-06"`).
 
+
 ### Task D – Rate Limiting & Abuse Protection
 
 The `get_job_by_phone` API uses `allow_guest=True`, so a rate limiter was implemented using `frappe.cache`.
@@ -1078,3 +1079,39 @@ bench clear-cache
 ```
 
 This command clears the server cache and reloads updated DocType metadata such as field labels, properties, and permissions.
+
+
+
+
+# L2 Payment Webhook – Internal Notes
+
+## Endpoint
+
+Webhook endpoint to receive payment confirmations from the payment gateway:
+
+/api/method/quickfix.api.payment_webhook
+
+The method uses `@frappe.whitelist(allow_guest=True)` so external systems can call it without authentication.
+
+## HMAC Signature Verification
+
+The webhook validates the request using **HMAC SHA256**.
+The gateway sends an `X-Signature` header, and the server generates the expected signature using a shared secret from `site_config.json`.
+
+`hmac.compare_digest()` is used instead of `==` to prevent **timing attacks**, ensuring constant-time comparison of signatures.
+
+## Deduplication
+
+Payment gateways may resend the same webhook event.
+The system checks the **Audit Log** table for an existing entry (`action = payment_received`, `document_name = ref`).
+If found, the request is marked as **duplicate** and skipped.
+
+## Result
+
+This ensures:
+
+* Secure webhook verification
+* Protection from replay or duplicate events
+* Safe update of Job Card payment status
+* Audit logging for traceability
+
