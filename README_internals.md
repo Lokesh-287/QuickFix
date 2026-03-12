@@ -957,3 +957,162 @@ It reads `job_card_name` using `frappe.form_dict` and returns only selected fiel
 Sensitive fields like `customer_email` are not returned.
 If the job card does not exist, it returns `{"error": "Not found"}` with HTTP 404.
 The Python date object is automatically serialized by Frappe to JSON format (e.g., `"2026-03-06"`).
+<<<<<<< Updated upstream
+=======
+
+### Task D – Rate Limiting & Abuse Protection
+
+The `get_job_by_phone` API uses `allow_guest=True`, so a rate limiter was implemented using `frappe.cache`.
+Requests are tracked per **IP address per minute**, and if the number exceeds the limit, the API returns **HTTP 429 (Too Many Requests)**.
+
+Risks of `allow_guest=True` endpoints:
+
+1. **Brute force attacks** – attackers can try many phone numbers to access data.
+2. **API abuse / DoS** – sending large numbers of requests can overload the server.
+3. **Data scraping** – attackers may automatically collect large amounts of data from the API.
+
+## M1 – Server Script DocType
+
+### Blocked Python functions/modules in Server Script sandbox
+
+Server Scripts run inside a restricted sandbox environment in Frappe. Dangerous Python modules and functions are blocked for security reasons.
+
+Examples of blocked modules/functions:
+- os module (cannot access operating system commands)
+- subprocess module (cannot run system processes)
+- sys module (restricted system access)
+- open() file operations (cannot read/write files on the server)
+- eval() and exec() for arbitrary code execution
+
+These restrictions prevent server scripts from executing unsafe operations or accessing the system environment.
+
+---
+
+### Three things you CANNOT do in a Server Script but can do in App Code
+
+1. Access the file system using open(), os, or file operations.
+2. Import and use arbitrary Python libraries or external packages.
+3. Execute system-level commands using subprocess or os.system().
+
+These operations are only possible in full app code where there are no sandbox restrictions.
+
+---
+
+### Two scenarios where Server Scripts are acceptable
+
+1. Implementing simple business rules such as automatically updating a field value when a condition is met.
+2. Creating lightweight API endpoints for simple data retrieval or quick automation.
+
+Server Scripts are useful for quick customizations without modifying the application code.
+
+---
+
+### Two scenarios where App Code should be used instead
+
+1. Complex business logic or workflows involving multiple operations.
+2. Integrations with external systems or APIs requiring authentication or background processing.
+
+These cases require proper application code for reliability and maintainability.
+
+---
+
+### Governance and Maintainability Risks of Server Scripts
+
+Server Scripts are stored in the database rather than version-controlled files. This creates governance risks such as:
+
+- Changes not being tracked in Git.
+- Difficult migration between development, staging, and production environments.
+- Harder code review and auditing.
+- Risk of hidden logic affecting system behavior.
+
+For long-term maintainability, important logic should be implemented in application code rather than server scripts.
+
+
+### M2 - Caching, Redis & Cache Invalidation
+## Task A
+
+
+## 5 Things Frappe Caches in Redis
+
+**1. bootinfo**
+Stored as a Redis Hash (`frappe.cache.hget("bootinfo", "Administrator")`). Contains the full desk startup payload — user roles, permission sets (can_create, can_read, can_write, can_submit, can_cancel, can_delete), system defaults, workspaces, reports, letter heads, and app versions. Built once per user per session. Invalidated by `frappe.clear_cache()` or logout.
+
+**2. DocType metadata / meta**
+Keys: `doctype_meta`, `metadata_version`. Stores the serialised meta object for every DocType — field definitions, naming series, controller path, and permission rules. Frappe reads this instead of querying `tabDocType` on every form open. `metadata_version` is bumped on every `bench migrate` or DocType save to signal workers to drop their local cache.
+
+**3. Website context**
+Keys: `document_cache::Workspace::QuickFix`, `document_cache::Workspace::Build`, `document_cache::Website Theme::Standard`. Stores serialised Workspace layouts, Website Theme, and portal settings. Read on every desk page load to render the sidebar and shortcuts. Invalidated when the document is saved.
+
+**4. Translations**
+Keys: `lang_user_translations`, `merged_translations`. `lang_user_translations` holds custom Translation records. `merged_translations` is the final merged dict — Frappe core strings + app strings + user overrides for the active language. The `__messages` dict inside bootinfo is the browser copy of this cache. Invalidated when a Translation record is saved.
+
+**5. User permissions**
+Keys: `roles`, `domain_restricted_doctypes`, `_user_settings`. `roles` caches all Role names so Frappe never hits `tabRole` on every request. `domain_restricted_doctypes` caches which DocTypes are hidden per active domain. `_user_settings` stores per-user column preferences and saved filters. Invalidated by role changes or `frappe.clear_cache()`.
+
+### Task B - Custom cache with expiry + invalidation:
+
+Using Redis caching improves performance by reducing database queries for frequently accessed dashboard data. However, without proper cache invalidation, users may see stale data. Implementing cache invalidation using DocType events ensures that the UI always displays up-to-date information.
+
+## Task C – Debugging Stale UI
+
+### Stale JavaScript after a change
+
+Sometimes after modifying a JavaScript file, the browser may still load the old version because Frappe caches built assets.
+
+To rebuild assets and load the latest JS:
+
+```
+bench build --app quickfix
+```
+
+`bench build --app quickfix` rebuilds the JavaScript and CSS files for the **quickfix** app so the browser loads the updated code.
+
+---
+
+### Stale DocType Metadata
+
+After modifying a DocType (for example changing a field label), users may still see old values because DocType metadata is cached.
+
+To clear this metadata cache:
+
+```
+bench clear-cache
+```
+
+This command clears the server cache and reloads updated DocType metadata such as field labels, properties, and permissions.
+
+
+
+# L2 Payment Webhook – Internal Notes
+
+## Endpoint
+
+Webhook endpoint to receive payment confirmations from the payment gateway:
+
+/api/method/quickfix.api.payment_webhook
+
+The method uses `@frappe.whitelist(allow_guest=True)` so external systems can call it without authentication.
+
+## HMAC Signature Verification
+
+The webhook validates the request using **HMAC SHA256**.
+The gateway sends an `X-Signature` header, and the server generates the expected signature using a shared secret from `site_config.json`.
+
+`hmac.compare_digest()` is used instead of `==` to prevent **timing attacks**, ensuring constant-time comparison of signatures.
+
+## Deduplication
+
+Payment gateways may resend the same webhook event.
+The system checks the **Audit Log** table for an existing entry (`action = payment_received`, `document_name = ref`).
+If found, the request is marked as **duplicate** and skipped.
+
+## Result
+
+This ensures:
+
+* Secure webhook verification
+* Protection from replay or duplicate events
+* Safe update of Job Card payment status
+* Audit logging for traceability
+
+>>>>>>> Stashed changes
