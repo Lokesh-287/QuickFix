@@ -1185,4 +1185,17 @@ A test file was uploaded as a **private attachment** to a Job Card.
 **Private files** are used for sensitive data like job attachments, invoices, or customer documents that should only be accessible to authorized users.
 
 
+### N2 
+## Debugging Email Failure
+
+When an email fails to send in Frappe, the following areas should be checked:
+
+**Email Queue:**
+Check the Email Queue to see the email status (Pending, Sent, or Error). It also shows retry attempts and the message that failed to send.
+
+**SMTP Logs:**
+Verify SMTP configuration such as server, port, username, and password. SMTP logs may show connection errors, authentication failures, or rejected messages.
+
+**Error Log:**
+Check the Error Log for exceptions related to email sending. It may contain details about SMTP errors, invalid recipients, or server connection issues.
 

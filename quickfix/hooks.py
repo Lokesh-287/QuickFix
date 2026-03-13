@@ -332,3 +332,11 @@ doc_events = {
         "on_update": "quickfix.cache_utils.clear_status_chart_cache"
     }
 }
+
+portal_menu_items = [
+    {
+        "title": "Track Job",
+        "route": "/track-job",
+        "role": "Guest"
+    }
+]
