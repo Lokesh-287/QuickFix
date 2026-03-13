@@ -33,6 +33,7 @@ def create_default_device_types():
     ]
     for device in default_devices:
         if not frappe.db.exists("Device Type",device["name"]):
+            # System install seed; no user is creating this master data manually.
             frappe.get_doc({
                 "doctype":"Device Type",
                 "device_type":device["name"],
@@ -46,4 +47,5 @@ def create_quickfix_settings():
     settings.default_labour_charge=500
     settings.low_stock_alert_enabled=1
     settings.low_stock_threshold=5
+    # System install initializes singleton defaults during app setup.
     settings.save(ignore_permissions=True)

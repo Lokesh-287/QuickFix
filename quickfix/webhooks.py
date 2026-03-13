@@ -42,6 +42,7 @@ def send_webhook(job_card_name, retry_count=0):
 
         response.raise_for_status()
 
+        # Background webhook processing records delivery status as an internal audit entry.
         frappe.get_doc({
             "doctype": "Audit Log",
             "action": "webhook_sent",

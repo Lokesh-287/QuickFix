@@ -1159,5 +1159,21 @@ In practice, this could lead to **data leakage, unauthorized updates, or full da
 
 **Best Practice:** Never combine `allow_guest=True` with `ignore_permissions=True`. Always enforce proper permission checks before returning or modifying data.
 
+### Task - C
+
+## Risk of Using `ignore_permissions=True` with `@frappe.whitelist(allow_guest=True)`
+
+If a developer sets `ignore_permissions=True` on an endpoint that also has `@frappe.whitelist(allow_guest=True)`, it creates a serious security vulnerability.
+
+* `allow_guest=True` allows **anyone on the internet to access the endpoint without logging in**.
+* `ignore_permissions=True` bypasses **Frappe’s role and permission checks**.
+
+If both are used together, an attacker could call the API and **access or modify database records without authentication or authorization**. This could expose sensitive information such as customer data, job details, or internal records.
+
+In practice, this could lead to **data leakage, unauthorized updates, or full database enumeration** through a public API.
+
+**Best Practice:** Never combine `allow_guest=True` with `ignore_permissions=True`. Always enforce proper permission checks before returning or modifying data.
+
+
 
 
