@@ -1174,6 +1174,15 @@ In practice, this could lead to **data leakage, unauthorized updates, or full da
 
 **Best Practice:** Never combine `allow_guest=True` with `ignore_permissions=True`. Always enforce proper permission checks before returning or modifying data.
 
+## Task D – Private vs Public Files
+
+A test file was uploaded as a **private attachment** to a Job Card.
+
+* Accessing it via `/files/filename.pdf` does **not work**, because this path is only for **public files**.
+* Accessing it via `/private/files/filename.pdf` requires the user to be **logged in and have permission** to view the document.
+
+**Public files** are used for assets that anyone can access (images, documents for website download).
+**Private files** are used for sensitive data like job attachments, invoices, or customer documents that should only be accessible to authorized users.
 
 
 
