@@ -61,7 +61,7 @@ class JobCard(Document):
 			doc = frappe.get_doc("Spare Part", part)
 			current_qty= doc.stock_qty or 0
 			new_qty=current_qty+quantity
-			#ignore_permissions=True use pannalam because stock deduction system automatic ha nadakkuthu, user manual ha stock edit panala.
+			# System rollback restores stock automatically when a job card is cancelled.
 			doc.stock_qty = new_qty
 			doc.save(ignore_permissions=True)
 			# frappe.db.set_value("Spare Part",part,"stock_qty",new_qty,ignore_permissions=True)
@@ -75,6 +75,7 @@ class JobCard(Document):
 
 
 	def create_invoice(self):
+		# System submit flow auto-generates the linked invoice from the job card.
 		frappe.get_doc({
 			"doctype":"Service Invoice",
 			"job_card":self.name,
@@ -98,8 +99,8 @@ class JobCard(Document):
 			if new_qty < 0:
 				frappe.throw(f"Stock cannot go negative for {part}")
 			doc.stock_qty = new_qty
+			# System submit flow deducts stock automatically; users are not editing inventory directly.
 			doc.save(ignore_permissions=True)
-			#ignore_permissions=True use pannalam because stock deduction system automatic ha nadakkuthu, user manual ha stock edit panala.
 			# frappe.db.set_value("Spare Part",part,"stock_qty",new_qty,ignore_permissions=True)
 
 

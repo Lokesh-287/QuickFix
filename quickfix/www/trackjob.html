@@ -1,0 +1,37 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+
+<h2>Track Job Status</h2>
+
+<form method="GET">
+    <input type="text" name="phone" placeholder="Enter phone number" required>
+    <button type="submit">Search</button>
+</form>
+
+<br>
+
+{% if jobs and jobs|length > 0 %}
+
+<h3>Job Results</h3>
+
+<table border="1" style="border-collapse: collapse; padding:10px;">
+    <tr>
+        <th>Job Card</th>
+        <th>Status</th>
+    </tr>
+
+    {% for job in jobs %}
+    <tr>
+        <td>{{ job.name }}</td>
+        <td>{{ job.status }}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% elif frappe.form_dict.phone %}
+<p>No job found for this phone number.</p>
+{% endif %}
+
+{% endblock %}

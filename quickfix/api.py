@@ -90,6 +90,7 @@ def send_job_ready_email(job_name):
 @frappe.whitelist()
 def custom_get_count(doctype,filters=None,debug=False,cache=False):
     print("!!!!!!!!!!!!!!!!!!!!!!!11")
+    # Audit logging needs its own write path, though this remains user-invoked.
     frappe.get_doc({
         "doctype": "Audit Log",
         "doctype_name": doctype,
@@ -124,6 +125,7 @@ def enqueue_technician_performance_report(filters=None):
         "report_name": "Technician Performance Report",
         "filters": frappe.as_json(filters or {}),
     })
+    # Creating Prepared Report hands work to background processing, but starts from a user request.
     doc.insert(ignore_permissions=True)
     frappe.db.commit()
 
@@ -204,6 +206,7 @@ def check_low_stock():
             message=f"<p>Parts below reorder level:</p><ul>{part_list}</ul>"
         )
 
+    # Low-stock monitoring writes an internal audit marker, though this method is currently whitelisted.
     frappe.get_doc({
         "doctype": "Audit Log",
         "doctype_name": "Spare Part",

@@ -1131,3 +1131,71 @@ The failed background job can also be seen in the **RQ Dashboard (`/rq`)** under
 
 If a bug occurs only in production, first check **Setup → Error Log** to view the traceback and identify where the error occurred. Then review the **Audit Log** to see what user action or document change triggered the issue. Next, inspect the **`frappe.logger("quickfix")` logs** in `sites/{site}/logs/quickfix.log` to trace application events. By matching **timestamps across Error Log, Audit Log, and logger output**, the root cause can be identified without enabling `developer_mode`.
 
+
+# N1 – Security Audit
+
+## Task A – SQL Injection Prevention
+
+SQL Injection occurs when **user input is directly inserted into SQL queries**, allowing attackers to modify the query and access unauthorized data.
+
+In Frappe, user input can come from sources like `frappe.form_dict`, `frappe.request.args`, or API parameters. If these values are used with **string formatting (f-strings or concatenation)** in SQL queries, it creates a security risk.
+
+Frappe provides `frappe.db.escape()` to sanitize input by escaping special SQL characters. However, this requires manual handling.
+
+The recommended and safest approach is to use **parameterized queries (`%s`)**, where user input is passed separately from the SQL statement. This ensures the database treats the input strictly as data and prevents SQL injection.
+
+**Conclusion:** Avoid f-string SQL queries and prefer **parameterized queries** for secure database operations.
+
+## Risk of Using `ignore_permissions=True` with `@frappe.whitelist(allow_guest=True)`
+
+If a developer sets `ignore_permissions=True` on an endpoint that also has `@frappe.whitelist(allow_guest=True)`, it creates a serious security vulnerability.
+
+* `allow_guest=True` allows **anyone on the internet to access the endpoint without logging in**.
+* `ignore_permissions=True` bypasses **Frappe’s role and permission checks**.
+
+If both are used together, an attacker could call the API and **access or modify database records without authentication or authorization**. This could expose sensitive information such as customer data, job details, or internal records.
+
+In practice, this could lead to **data leakage, unauthorized updates, or full database enumeration** through a public API.
+
+**Best Practice:** Never combine `allow_guest=True` with `ignore_permissions=True`. Always enforce proper permission checks before returning or modifying data.
+
+### Task - C
+
+## Risk of Using `ignore_permissions=True` with `@frappe.whitelist(allow_guest=True)`
+
+If a developer sets `ignore_permissions=True` on an endpoint that also has `@frappe.whitelist(allow_guest=True)`, it creates a serious security vulnerability.
+
+* `allow_guest=True` allows **anyone on the internet to access the endpoint without logging in**.
+* `ignore_permissions=True` bypasses **Frappe’s role and permission checks**.
+
+If both are used together, an attacker could call the API and **access or modify database records without authentication or authorization**. This could expose sensitive information such as customer data, job details, or internal records.
+
+In practice, this could lead to **data leakage, unauthorized updates, or full database enumeration** through a public API.
+
+**Best Practice:** Never combine `allow_guest=True` with `ignore_permissions=True`. Always enforce proper permission checks before returning or modifying data.
+
+## Task D – Private vs Public Files
+
+A test file was uploaded as a **private attachment** to a Job Card.
+
+* Accessing it via `/files/filename.pdf` does **not work**, because this path is only for **public files**.
+* Accessing it via `/private/files/filename.pdf` requires the user to be **logged in and have permission** to view the document.
+
+**Public files** are used for assets that anyone can access (images, documents for website download).
+**Private files** are used for sensitive data like job attachments, invoices, or customer documents that should only be accessible to authorized users.
+
+
+### N2 
+## Debugging Email Failure
+
+When an email fails to send in Frappe, the following areas should be checked:
+
+**Email Queue:**
+Check the Email Queue to see the email status (Pending, Sent, or Error). It also shows retry attempts and the message that failed to send.
+
+**SMTP Logs:**
+Verify SMTP configuration such as server, port, username, and password. SMTP logs may show connection errors, authentication failures, or rejected messages.
+
+**Error Log:**
+Check the Error Log for exceptions related to email sending. It may contain details about SMTP errors, invalid recipients, or server connection issues.
+
