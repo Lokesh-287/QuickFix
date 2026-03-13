@@ -1131,3 +1131,19 @@ The failed background job can also be seen in the **RQ Dashboard (`/rq`)** under
 
 If a bug occurs only in production, first check **Setup → Error Log** to view the traceback and identify where the error occurred. Then review the **Audit Log** to see what user action or document change triggered the issue. Next, inspect the **`frappe.logger("quickfix")` logs** in `sites/{site}/logs/quickfix.log` to trace application events. By matching **timestamps across Error Log, Audit Log, and logger output**, the root cause can be identified without enabling `developer_mode`.
 
+
+# N1 – Security Audit
+
+## Task A – SQL Injection Prevention
+
+SQL Injection occurs when **user input is directly inserted into SQL queries**, allowing attackers to modify the query and access unauthorized data.
+
+In Frappe, user input can come from sources like `frappe.form_dict`, `frappe.request.args`, or API parameters. If these values are used with **string formatting (f-strings or concatenation)** in SQL queries, it creates a security risk.
+
+Frappe provides `frappe.db.escape()` to sanitize input by escaping special SQL characters. However, this requires manual handling.
+
+The recommended and safest approach is to use **parameterized queries (`%s`)**, where user input is passed separately from the SQL statement. This ensures the database treats the input strictly as data and prevents SQL injection.
+
+**Conclusion:** Avoid f-string SQL queries and prefer **parameterized queries** for secure database operations.
+
+
